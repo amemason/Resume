@@ -15,6 +15,6 @@ August 2018 – May 2019<br>
 MATLAB, C++, Python<br>
 
 **Software** <br>
-Microsoft Word, Microsoft Excel, Adobe Photoshop
+Microsoft Word, Microsoft Excel, Microsoft Power BI, Adobe Photoshop
 
 ## Projects
