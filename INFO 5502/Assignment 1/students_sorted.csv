@@ -1,0 +1,101 @@
+First Name,Middle Initial,Last Name,Address,Major,Credit Hours,Scholarship,GPA
+Hasan,A,Abbas,"7975 W. New St. Houston, TX 77016",Information Technology,15,True,3.6
+Caroline,C,Adams,"631 Ann Drive Austin, TX 78758",Spanish,48,True,3.9
+Byron,S,Aguirre,"22 Wilson Circle Pasadena, TX 77506",Archaeology,12,True,3.8
+Joel,T,Anderson,"9761 Gartner St. Cleburne, TX 76031",News Writing,33,False,3.2
+Sarah,P,Anderson,"81 Locust Court Paducah, KY 42001",Music Education,63,False,3.5
+Kayleigh,L,Armstrong,"774 Sutor Street Westport, CT 06880",Fashion Design,33,False,3.2
+Kim,H,Banks,"933 St Margarets Road El Paso, TX 79936",Spanish,21,True,4.0
+Felix,H,Barnes,"11 Lilac St. Spring, TX 77373",Political Science,60,False,2.8
+Hayley,K,Becker,"91 W. Lower River St. Houston, TX 77080",Chemistry,83,False,3.6
+Scott,P,Bishop,"11 Summer St. La Porte, TX 77571",Marketing,60,False,3.6
+Tyler,N,Butler,"31 Hudson Lane Dallas, TX 75216",Music Education,46,True,3.6
+Taylor,J,Campbell,"543 Oakland St. Mercedes, TX 78570",Supply Chain Management,36,False,3.2
+Jack,G,Chang,"749 Glenholme Ave. Austin, TX 78745",Economics,45,False,3.5
+Zakariya,H,Clark,"62 Green Dr. San Antonio, TX 78211",Interior Design,36,True,3.9
+Mark,H,Coleman,"541 N. Forest Ave. Livingston, TX 77351",UNT,15,True,4.0
+Mary,K,Connolly,"959 N. Border Avenue New Braunfels, TX 78130",Public Relations,27,True,4.0
+Mark,T,Cook,"435 Colonial Road Apt 489 San Antonio, TX 78229",Electrical Engineering,83,False,3.5
+Tobias,T,Cross,"382 Pacific St. Lake Jackson, TX 77566",Early Childhood Education,62,True,4.0
+Caleb,N,Cruz,"213 Bridle Street Houston, TX 77039",Accounting,24,True,3.8
+Leon,M,Cummings,"481 Randall Mill Lane Friendswood, TX 77546",Journalism,81,False,3.4
+Tristan,P,Davidson,"798 South Hilltop Road Waco, TX 76705",Drawing and Painting,12,True,3.8
+Maria,D,Diaz,"20 John St. Coraopolis, PA 15108",Art History,93,True,4.0
+Vincent,D,Drake,"276 Pawnee Rd. Corpus Christi, TX 78413",Biochemistry,16,True,3.5
+Tim,F,Dunn,"48 E. Livingston St. Maryville, TN 37803",Dentistry,81,True,3.5
+Michelle,B,Erickson,"71 Pheasant Ave. San Antonio, TX 78237",Accounting,39,False,3.3
+Theodore,A,Fitzgerald,"98 Wild Rose Street Victoria, TX 77901",Chemistry,35,True,4.0
+John,I,Freeman,"205 Constitution Street Fort Worth, TX 76119",Kinesiology,74,True,3.8
+Max,E,Gardner,"9426 Monroe Road Corpus Christi, TX 78415",Physics,52,True,3.8
+Heidi,R,Gibbs,"8137 North Essex Court Killeen, TX 76543",Chemistry,32,True,3.6
+Ann,H,Gonzalez,"8034 West Brickell Court Plano, TX 75074",Hospitality Management,28,True,3.6
+Troy,B,Goodman,"8009 State Ave. Killeen, TX 76543",Criminal Justice,63,False,2.9
+Alexander,M,Hammond,"128 W. Corona Avenue Deer Park, TX 77536",Electrical Engineering,103,False,3.5
+Oscar,S,Hardy,"7099 Shadow Brook Street Westerville, OH 43081",Forensic Science,27,True,3.5
+Molly,E,Harper,"7456 Oakland St. Rio Grande City, TX 78582",Hospitality Management,30,True,3.9
+Chantelle,M,Hart,"9627 Princeton St. College Station, TX 77845",Information Technology,36,False,3.4
+Hugh,V,Hill,"263 Big Rock Cove Ave. Griffin, GA 30223",News Writing,54,False,3.2
+Sam,O,Holden,"95 SE. White Avenue Belton, TX 76513",Mechanical Engineering,24,True,3.6
+Justin,G,Howell,"626 E Acacia Ave, Alamo, TX 78516",Communication Design,74,True,3.8
+Stacey,P,Jacobs,"399 Wilson Street San Angelo, TX 76903",Supply Chain Management,45,False,3.2
+Steve,C,Jennings,"788 Lees Creek Lane Thornton, CO 80241",Drawing and Painting,93,False,3.2
+Keira,M,Johnson,"16 Yukon Ave. El Paso, TX 79925",Visual Arts and Design,84,True,3.9
+Benjamin,H,Kelly,"7394 Evergreen St. Arlington, TX 76014",Visual Arts and Design,63,False,3.3
+Ana,G,Kennedy,"8198 3rd Ave. Mocksville, NC 27028",Dance,95,True,3.8
+Abdul, ,Khan,"7320 Mill Pond Drive Houston, TX 77017",Finance,18,False,3.3
+Constance, ,King,"899 Bayport Road San Antonio, TX 78229",Theatre,66,True,3.7
+Mae,B,Knight,"144 La Sierra Road Palestine, TX 75801",Linguistics,64,False,3.3
+James,H,Larson,"64 West Forest Dr. El Paso, TX 79930",Biochemistry,24,True,3.8
+Carl,A,Little,"89 San Juan Lane Lubbock, TX 79424",Philosophy,15,True,3.8
+Paul,L,Lowe,"16 Armstrong St. Grapevine, TX 76051",Philosophy,36,False,3.0
+Marcos,G,Martinez,"791 Oklahoma Drive Richmond, TX 77469",History,54,False,3.1
+Brian,P,McDonald,"15 Corona Street Grand Prairie, TX 75051",Finance,54,False,3.3
+Rachel,H,McFarlane,"946 S. Queen Rd. League City, TX 77573",Spanish,72,True,3.9
+Zachary,E,McGuire,"937 Shipley St. Waco, TX 76705",Sociology,90,True,4.0
+Rick,A,McLaughlin,"8354 SE. Canal Rd. Grapevine, TX 76051",German,72,True,3.5
+Lucy,M,Medina,"8242 San Juan St. Laredo, TX 78041",Anthropology,67,False,3.2
+Patrick,Q,Miles,"9121 Sutor Ave. San Antonio, TX 78217",Vocal Performance,18,True,3.9
+Mabel,D,Mills,"873 West Gregory Rd. Sugar Land, TX 77479",Sociology,93,False,3.2
+Luke,J,Murphy,"56 Cedar Swamp St. Austin, TX 78759",Accounting,15,True,4.0
+Charlie,M,Nash,"466 Brook Road Mesquite, TX 75150",Biology,75,False,3.4
+Lily,I,Navarro,"47 Edgewater St. Houston, TX 77087",Religious Studies,63,False,3.2
+Rachael,E,Nelson,"23 Belmont Lane Austin, TX 78753",Biology,103,True,3.7
+Lena,K,Newman,"8385 Pennsylvania Street Houston, TX 77066",Biology,57,True,3.7
+Bea,A,Nguyen,"340 Cottage Road Dallas, TX 75211",Mechanical Engineering,78,False,3.4
+Andrew,W,O'Connor,"41 East Eagle Road El Paso, TX 79936",Information Technology,36,True,3.7
+Kyle,T,Ochoa,"3 University Ave. Grand Prairie, TX 75052",Film,33,True,4.0
+Gabriella, ,Otiz,"828 John Dr. San Marcos, TX 78666",Biology,30,False,3.4
+Lauren,K,Owens,"846 NW. Pilgrim Drive Longview, TX 75604",Linguistics,72,False,3.4
+Lacey,M,Parson,"187 West Thomas St. Pearland, TX 77584",Jazz Studies,42,True,3.6
+Raymond,N,Patton,"8908 Lake View Street Missouri City, TX 77489",Forensic Science,67,False,3.5
+Jimmy,J,Payne,"7921 Jennings Dr. Austin, TX 78744",Physics,21,True,4.0
+Laurence,J,Perry,"9730 Paris Hill St. Austin, TX 78741",Jazz Studies,69,False,3.2
+Charley,C,Peterson,"59 Lyme Street Cypress, TX 77429",English,18,True,3.9
+Frank,R,Poole,"184 Garfield Drive Midland, TX 79705",Criminal Justice,24,False,3.2
+Spencer,R,Potter,"7976 Glenridge St. Cleburne, TX 76031",Biology,71,False,3.1
+Anthony,J,Price,"7170 Brickell St. Grapevine, TX 76051",Kinesiology,42,False,3.2
+Anika,K,Ray,"1 Sleepy Hollow Dr. San Antonio, TX 78229",Linguistics,72,False,3.5
+Paige,C,Reeves,"7961 Columbia St. Sicklerville, NJ 08081",Mathematics,66,False,3.2
+Kelly,N,Reynolds,"9527 Overlook Lane Newburgh, NY 12550",Psychology,65,False,3.2
+Travis,R,Rice,"6 Arrowhead St. Austin, TX 78745",Supply Chain Management,72,True,3.8
+Victoria,N,Richardson,"480 Canal Ave. Houston, TX 77064",UNT,18,True,4.0
+Ashley,G,Rose,"783 Goldfield Road Houston, TX 77076",Composition,34,True,3.6
+Alesha,L,Ruiz,"368 Pacific Lane Irving, TX 75060",Marketing,33,False,3.2
+Edie,H,Santiago,"8858 Broad Rd. Round Rock, TX 78681",Music Education,30,False,3.5
+Julia,B,Shaw,"7311 SW. Lafayette Street Fleming Island, FL 32003",Journalism,15,True,4.0
+Damien,T,Sinclair,"8671 North Ryan Street Mc Kinney, TX 75070",Mathematics,78,True,3.7
+Archie,S,Snyder,"45 Glendale St. Schaumburg, IL 60193",Kinesiology,90,True,3.7
+Douglas,T,Stokes,"586 S. Miller Rd. Huntsville, TX 77320",Marketing,42,False,3.4
+Amira,J,Sullivan,"9314 Mulberry Street Livingston, TX 77351",Dance,24,True,3.9
+Tommy,W,Turner,"529 Sulphur Springs Street Channelview, TX 77530",Theatre,93,True,3.7
+Marie,L,Vargas,"3 South Meadowbrook Drive Dallas, TX 75231",Women's and Gender Studies,68,False,3.4
+Kevin,J,Vega,"13 Honey Creek Ave. Fort Worth, TX 76116",French,12,True,3.9
+Declan,C,Walker,"9878 Sherwood Ave. Laredo, TX 78045",Mathematics,67,False,3.5
+Francis,L,Warren,"8826 Gartner Ave. Clarksburg, WV 26301",Chemistry,23,True,3.7
+Rhea,H,Watts,"9088 Atlantic St. Ann Arbor, MI 48103",Fashion Design,72,False,3.3
+Tiana,A,Webb,"234 Winchester Court Pflugerville, TX 78660",Art History,18,True,3.9
+Louise,Y,Williams,"548 Linda Dr. Dickinson, TX 77539",Philosophy,42,True,3.7
+Sara,A,Wolfe,"7771 Shub Farm St. Big Spring, TX 79720",Linguistics,21,False,2.9
+Alan,A,Wong,"9776 N. Beacon Drive Galveston, TX 77550",English,18,True,4.0
+Margaret,B,Wright,"362 Bridgeton St. Houston, TX 77057",Political Science,18,True,4.0
+Christina,N,Yang,"27 Redwood Drive Dallas, TX 75231",Economics,82,False,3.3
