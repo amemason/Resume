@@ -1,6 +1,5 @@
 # Amelia Mason
 [Resume PDF](https://github.com/amemason/Resume/blob/master/Resume.pdf)<br>
-aemason.1996@gmail.com
 
 ## Experience
 **Texas Tech University - Lubbock, TX**<br>
