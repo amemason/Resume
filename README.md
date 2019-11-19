@@ -17,3 +17,5 @@ MATLAB, C++, Python<br>
 Microsoft Word, Microsoft Excel, Microsoft Power BI, Adobe Photoshop
 
 ## Projects
+[Creating Geographic Visuals Using Elevation Data (C++)](https://github.com/amemason/Resume/blob/master/ECE%201305/project.cpp)<br>
+[Analyzing and Creating Visuals Using a Dataset of HIV Prevalence Rates (Python)](https://github.com/amemason/Resume/blob/master/INFO%205502/Assignment%202/Assignment_2.ipynb)
