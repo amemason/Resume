@@ -1,0 +1,584 @@
+;-------------------------------------------------------------------------------
+;       This code creates a digital thermometer using ACD10. When the 
+;       rightmost pushbutton is pressed, the display toggles between 
+;       Fahrenheit and Celsius. The code is set in Fahrenheit mode when the
+;       device is powered on.
+;
+;       Date:           November 17, 2016
+;       Last Revision:  1.0, November 15, 2016
+;                       1.1 - fixed bugs
+;       Written by:     Amelia Mason
+;       Adapted from:   "DemoPartialSolutionForTemperatureW_7_seg", &
+;                       "DemoWithADC10TempSensor" Dr. Michael Helm, 
+;                       ECE dept, Texas Tech University
+;       Assembler/IDE:  IAR Embedded Workbench 5.5
+;
+;       HW I/O assignments:
+;       P1.0    (output) Segment A (active low) drives  board
+;       P1.1    (output) Segment B (active low) drives display board
+;       P1.2    (output) Segment C (active low) drives display board
+;       P1.3    (output) Segment D (active low) drives display board
+;       P1.4    (output) Segment E (active low) drives display board
+;       P1.5    (output) Segment F (active low) drives display board
+;       P1.6    (output) Segment G (active low) drives display board
+;       P1.7    (output) Segment DP (active low) drives display board
+;
+;       P2.0    (output) Digit 3 (active low) MSdigit (leftmost)
+;       P2.1    (output) Digit 2 (active low)  
+;       P2.2    (output) Digit 1 (active low)  
+;       P2.3    (output) Digit 0 (active low) LSdigit (rightmost)
+;       P2.4    (output) Other - (dots - colon) (active low)
+;       P2.5    (input)  Pushbutton 0 (active low) (rightmost)
+;       P2.6    (input)  Pushbutton 1 (active low) (middle)
+;       P2.7    (input)  Pushbutton 2 (active low) (leftmost)
+;
+;
+;
+;*******************************************************************************
+#include  "msp430g2553.h"
+;-------------------------------------------------------------------------------
+; Definition of Constants
+;-------------------------------------------------------------------------------
+
+TIMER_A_COUNT   EQU   1000
+LONG_DELAY      EQU   65535  
+
+SEG_A         EQU     %00000001 ; Port pin position P1.0
+SEG_B         EQU     %00000010 ; Port pin position P1.1
+SEG_C         EQU     %00000100 ; Port pin position P1.2
+SEG_D         EQU     %00001000 ; Port pin position P1.3
+SEG_E         EQU     %00010000 ; Port pin position P1.4
+SEG_F         EQU     %00100000 ; Port pin position P1.5
+SEG_G         EQU     %01000000 ; Port pin position P1.6
+SEG_DP        EQU     %10000000 ; Port pin position P1.7
+
+;since inverted pattern is needed for the display, this defines inverse pattern
+SEG_A_N       EQU     ~SEG_A ; Port pin position P1.0
+SEG_B_N       EQU     ~SEG_B ; Port pin position P1.1
+SEG_C_N       EQU     ~SEG_C ; Port pin position P1.2
+SEG_D_N       EQU     ~SEG_D ; Port pin position P1.3
+SEG_E_N       EQU     ~SEG_E ; Port pin position P1.4
+SEG_F_N       EQU     ~SEG_F ; Port pin position P1.5
+SEG_G_N       EQU     ~SEG_G ; Port pin position P1.6
+SEG_DP_N      EQU     ~SEG_DP ; Port pin position P1.7
+
+;NOTE: display board requires INVERSE of these patterns due to Active LOW
+DIG_3         EQU     %00000001 ; Port pin position P2.0 (MSdigit)
+DIG_2         EQU     %00000010 ; Port pin position P2.1
+DIG_1         EQU     %00000100 ; Port pin position P2.2
+DIG_0         EQU     %00001000 ; Port pin position P2.3(LSdigit)
+DP_COM        EQU     %00010000 ; Port pin position P2.4
+
+;since inverted pattern is needed for the display, this defines inverse pattern
+DIG_3_N       EQU     ~DIG_3 ; Port pin position P2.0 (MSdigit)
+DIG_2_N       EQU     ~DIG_2 ; Port pin position P2.1
+DIG_1_N       EQU     ~DIG_1 ; Port pin position P2.2
+DIG_0_N       EQU     ~DIG_0 ; Port pin position P2.3(LSdigit)
+DP_COM_N      EQU     ~DP_COM ; Port pin position P2.4
+
+;Pushbutton assignments CORRECTED to compensate for board layout swap
+PB_0         EQU     %00100000 ; Port pin position P2.5  RightMost button
+PB_1         EQU     %10000000 ; Port pin position P2.7  Middle button
+PB_2         EQU     %01000000 ; Port pin position P2.6  LeftMost button
+
+SEG_PORT         EQU     P1OUT
+DIG_PORT         EQU     P2OUT
+PB_PORT          EQU     P2IN
+
+;NOTE: display bd requires the INVERSE of these patterns due to Active LOW
+ONE             EQU     %00000110
+TWO             EQU     %01011011
+THREE           EQU     %01001111
+FOUR            EQU     %01100110
+FIVE            EQU     %01101101
+SIX             EQU     %01111101
+SEVEN           EQU     %00000111
+EIGHT           EQU     %01111111
+NINE            EQU     %01100111
+ZERO            EQU     %00111111
+DEGREE          EQU     %00000100
+C_DISP          EQU     %00111001
+F_DISP          EQU     %01110001
+
+;since inverted pattern is needed for the display, this defines inverse pattern
+ONE_N           EQU     ~%00000110
+TWO_N           EQU     ~%01011011
+THREE_N         EQU     ~%01001111
+FOUR_N          EQU     ~%01100110
+FIVE_N          EQU     ~%01101101
+SIX_N           EQU     ~%01111101
+SEVEN_N         EQU     ~%00000111
+EIGHT_N         EQU     ~%01111111
+NINE_N          EQU     ~%01100111
+ZERO_N          EQU     ~%00111111
+DEGREE_N        EQU     ~%00000100
+C_DISP_N        EQU     ~%00111001
+F_DISP_N        EQU     ~%01110001
+
+;-------------------------------------------------------------------------------
+; Definition of Variables
+;-------------------------------------------------------------------------------
+
+            ORG   0200h     ; beginning of RAM space (necessary statement)
+            
+CurrentTemp        DW    0  ; global variable storing the display temp
+CurrentDigitPos    DB    0  ; global variable used by WriteDigitToDisplay ISR
+                            ; holds digit position of current digit to write
+ADC10_INT          DB    0  ; global variable to keep track of how many times
+                            ; ADC10 interupt has occured 
+
+;-------------------------------------------------------------------------------
+            ORG     0C000h                  ; Program Reset (prog memory start)
+                                            ; this is Program memory start 
+                                            ; address for MSP430G2553 (16K)
+;-------------------------------------------------------------------------------
+RESET       mov.w   #0400h,SP        ; Initialize stackpointer(to end of RAM +1)
+                                     ; RAM is 512 bytes, last position is 3FFh
+                                     
+StopWDT     mov.w   #WDTPW+WDTHOLD,&WDTCTL  ; Stop WDT
+
+SetupP1     mov.b   #0FFh, &P1DIR  ; all as outputs (using 4-dig bd)          
+           
+SetupP2
+           mov.b   #01Fh, &P2DIR ; all but 3 MSbits as outputs (using 4-dig bd)  
+
+; activate the General Purpose Digital I/O mode for P2.6 and P2.7
+           bic.b   #PB_1+PB_2, &P2SEL
+           
+           ; The PushButtons are wired to P2.5,6,7 (active LOW), so we need to  
+           ; turn on the internal Pullup Resistors  - this is done with P2REN
+           ; register           
+           mov.b    #PB_0+PB_1+PB_2, &P2REN    ;turn on the internal resistor
+           mov.b    #PB_0+PB_1+PB_2, &P2OUT    ; set the resistor to Pullup mode
+           
+           ; turn off all the segments and digits
+           mov.b #0FFh, &SEG_PORT
+           mov.b #0FFh, &DIG_PORT  
+           
+           ;setup Port 2 interrupts for the pushbutton
+           bis.b   #PB_0+PB_1+PB_2, &P2IE    ; enable interrput for Pushbutton
+           bis.b   #PB_0+PB_1+PB_2, &P2IES   ; set edge select for high to low trans
+           
+           clr.b   &P2IFG     ; clear the Int flag register for Port 2           
+         
+ClearRAMVariables
+            clr.w  &CurrentTemp
+            clr.b  &CurrentDigitPos
+            clr.b  &ADC10_INT
+
+SetRegister
+            clr.w  R5   ; R5 is used as a bool to indicate the mode (0) for 
+                        ;fahrenheit and (1) for Celsius
+           
+; setup ADC10 and temperature sensor
+
+SetupADC10  mov.w   #INCH_10+ADC10DIV_3,&ADC10CTL1     ; Temp Sensor ADC10CLK/4
+            mov.w   #SREF_1+ADC10SHT_3+REFON+ADC10ON+ADC10IE,&ADC10CTL0 ;
+
+SetupCalibratedClock       
+; Set up the clock (calibrated mode at 1 MHz)
+; Get the calibrated data for the DCO clock
+          CLR.B &DCOCTL ; Select lowest DCOx  and MODx settings
+          MOV.B &CALBC1_1MHZ,&BCSCTL1 ; Set range
+          MOV.B &CALDCO_1MHZ,&DCOCTL ; Set DCO step + modulation       
+            
+SetupTimerA
+          mov.w   #TIMER_A_COUNT,&TA0CCR0 ;load a count value into the counter
+          mov.w   #CCIE,&TA0CCTL0        ; enable the timer interrupt
+
+          mov.w   #TASSEL_2+ID_0+MC_1,&TA0CTL   ; select SMCLK/1, up mode 
+            
+ClearInterruptFlags
+           clr.b   &P2IFG     ; clear the Int flag register for Port 2  
+
+EnableGeneralInterrupts
+            bis.b #GIE,SR          ; enable the general interrupts bit
+          
+          
+;-------------------------------------------------------------------------------  
+Mainloop   
+           bis.w #ENC+ADC10SC,&ADC10CTL0   ; Start sampling/conversion
+           cmp.b #01h, R5                  ; check to see if mode is F or C
+           jeq   Celsius_Mode
+           jne   Fahrenheit_Mode
+
+Celsius_Mode                               ; converts ADC10 sample to C
+           call  #Trans2TempC
+           call  #BIN2BCD4
+           mov.w R13, &CurrentTemp 
+           rla   &CurrentTemp              ; moves temp into correct position
+           rla   &CurrentTemp
+           rla   &CurrentTemp
+           rla   &CurrentTemp
+           
+           jmp   Done
+           
+Fahrenheit_Mode
+           call  #Trans2TempF              ; converts ADC10 sample to F
+           call  #BIN2BCD4
+           mov.w R13, &CurrentTemp
+           rla   &CurrentTemp              ; moves temp into correct position
+           rla   &CurrentTemp
+           rla   &CurrentTemp
+           rla   &CurrentTemp
+
+           jmp   Done
+           
+Done
+           call  #Delay_Long               ; delay to kill time between samples
+           call  #Delay_Long
+           jmp   Mainloop
+
+;-------------------------------------------------------------------------------
+;           End of main code
+;-------------------------------------------------------------------------------                                            
+                                           
+;-------------------------------------------------------------------------------
+;           Subroutines
+;------------------------------------------------------------------------------- 
+
+
+
+
+; subroutines from TI example code for temperature issues
+;-------------------------------------------------------------------------------
+Trans2TempC;Subroutine coverts R12 = ADC10MEM/1024*423-278
+;           oC = ((x/1024)*1500mV)-986mV)*1/3.55mV = x*423/1024 - 278
+;           Input:  ADC10MEM  0000 - 0FFFh, R11, R12, R14, R15 working register
+;           Output: R12  0000 - 091h
+;-------------------------------------------------------------------------------
+            push    R11
+            push    R14
+            push    R15
+            mov.w   &ADC10MEM,R12           ;
+            mov.w   #423,R11                ; C
+            call    #MPYU                   ;
+            bic.w   #00FFh,R14              ; /1024
+            add.w   R15,R14                 ;
+            swpb    R14                     ;
+            rra.w   R14                     ;
+            rra.w   R14                     ;
+            mov.w   R14,R12                 ;
+            sub.w   #278,R12                ; C
+            pop     R11
+            pop     R14
+            pop     R15
+            ret                             ;
+                                            ;
+;-------------------------------------------------------------------------------
+Trans2TempF;Subroutine coverts R12 = ADC10MEM/1024*761-468
+;           oF = ((x/1024)*1500mV)-923mV)*1/1.97mV = x*761/1024 - 468
+;           Input:  ADC10MEM  0000 - 0FFFh, R11, R12, R14, R15 working register
+;           Output: R12  0000 - 0124h
+;-------------------------------------------------------------------------------
+            push    R11
+            push    R14
+            push    R15
+            mov.w   &ADC10MEM,R12           ;
+            mov.w   #761,R11                ; F
+            call    #MPYU                   ;
+            bic.w   #00FFh,R14              ; /1024
+            add.w   R15,R14                 ;
+            swpb    R14                     ;
+            rra.w   R14                     ;
+            rra.w   R14                     ;
+            mov.w   R14,R12                 ;
+            sub.w   #468,R12                ; F
+            pop     R11
+            pop     R14
+            pop     R15
+            ret                             ;
+                                            ;
+;-------------------------------------------------------------------------------
+BIN2BCD4  ; Subroutine converts binary number R12 -> Packed 4- digit BCD R13
+;           Input:  R12  0000 - 0FFFh, R15 working register
+;           Output: R13  0000 - 4095
+;-------------------------------------------------------------------------------
+            mov.w   #16,R15                 ; Loop Counter
+            clr.w   R13                     ; 0 -> RESULT LSD
+BIN1        rla.w   R12                     ; Binary MSB to carry
+            dadd.w  R13,R13                 ; RESULT x2 LSD
+            dec.w   R15                     ; Through?
+            jnz     BIN1                    ; Not through
+            ret                             ;
+                                            ;
+;-------------------------------------------------------------------------------
+MPYU   ;    Unsigned Multipy R11 x R12 = R15|R14
+       ;    Input:  R11, R12 -- R10 and R13 are working registers
+       ;    Output: R15, R14
+;-------------------------------------------------------------------------------
+            clr.w   R14                     ; 0 -> LSBs result
+            clr.w   R15                     ; 0 -> MSBs result
+MACU        clr.w   R13                     ; MSBs multiplier
+            mov.w   #1,R10                  ; bit test register
+MPY2        bit.w   R10,R11                 ; test actual bit
+            jz      MPY1                    ; IF 0: do nothing
+            add.w   R12,R14                 ; IF 1: add multiplier to result
+            addc.w  R13,R15                 ;
+MPY1        rla.w   R12                     ; multiplier x 2
+            rlc.w   R13                     ;
+            rla.w   R10                     ; next bit to test
+            jnc     MPY2                    ; if bit in carry: finished
+            ret                             ; Return from subroutine
+
+;-------------------------------------------------------------------------------
+; WriteNextDigitToDisplay
+;  passed in - CurrentTemp, CurrentDigitPos 
+;  returned - nothing
+;  accomplishes - Writes next digit to the expansion bd display
+;  uses: R15, global variable CurrentDigitPos, CurrentDigitValue
+;-------------------------------------------------------------------------------
+WriteNextDigitToDisplay
+    push R15     ; save R15 since we use it here
+    
+;following line added to fix "ghosting" problem  
+    bis.b #DIG_0+DIG_1+DIG_2+DIG_3+DP_COM, DIG_PORT   ; this turns off any 
+                       ;digits that are already ON
+                      ; eliminates the "ghosting" problem
+                      
+; which digit do we write out for this time?   
+    cmp #0, &CurrentDigitPos
+    jeq  WriteDig0
+    
+    cmp #1, &CurrentDigitPos
+    jeq  WriteDig1
+    
+    cmp #2, &CurrentDigitPos
+    jeq  WriteDig2
+    
+    cmp #3, &CurrentDigitPos
+    jeq  WriteDig3
+    
+    cmp #4, &CurrentDigitPos
+    jeq  WriteDegree
+    
+    ; invalid case - CurrentDigPos is invalid value
+    clr &CurrentDigitPos   ; reset it
+    jmp DoneWithDigitWriteTotally  ; get out of here
+
+WriteDig0
+    cmp #1, R5             ; check to see if For C mode
+    jeq CWrite
+    jne FWrite
+ 
+CWrite
+    mov.b #C_DISP_N, SEG_PORT  ; Writes a C in the first digit
+    mov.b #DIG_0_N, DIG_PORT
+    jmp DoneWithDigitWrite
+    
+FWrite
+    mov.b #F_DISP_N, SEG_PORT  ; Writes an F in the first digit
+    mov.b #DIG_0_N, DIG_PORT
+    jmp DoneWithDigitWrite
+
+WriteDig1
+    mov &CurrentTemp, R15  ; make a copy
+    and #00F0h, R15         ; mask out all but Dig 1
+    rra R15                     ; get the value into LSnibble position
+    rra R15
+    rra R15
+    rra R15
+    ; use the value in R15 as an offset or index into SegPatternTable
+    add #SegPatternTable, R15  ; R15 now points to correct Seg pattern to write
+    mov.b @R15, SEG_PORT       ; set up the pattern to write
+    mov.b #DIG_1_N, DIG_PORT
+    jmp DoneWithDigitWrite
+    
+WriteDig2
+    mov &CurrentTemp, R15  ; make a copy
+    and #0F00h, R15         ; mask out all but Dig 2
+    swpb R15                    ; get the value into LSnibble position
+    ; use the value in R15 as an offset or index into SegPatternTable
+    add #SegPatternTable, R15  ; R15 now points to correct Seg pattern to write
+    mov.b @R15, SEG_PORT       ; set up the pattern to write
+    mov.b #DIG_2_N, DIG_PORT
+    jmp DoneWithDigitWrite
+    
+WriteDig3
+    mov &CurrentTemp, R15  ; make a copy
+    and #0F000h, R15         ; mask out all but Dig 3
+    cmp #0000h, R15
+    jeq DoneWithDigitWrite
+    
+    swpb R15
+    rra R15                     ; get the value into LSnibble position
+    rra R15
+    rra R15
+    rra R15    
+    ; use the value in R15 as an offset or index into SegPatternTable
+    add #SegPatternTable, R15  ; R15 now points to correct Seg pattern to write
+    mov.b @R15, SEG_PORT       ; set up the pattern to write    
+    mov.b #DIG_3_N, DIG_PORT
+    jmp DoneWithDigitWrite
+
+WriteDegree
+    mov.b #0FFh, DIG_PORT      ; Writes the degree symbol
+    mov.b #DEGREE_N, SEG_PORT
+    mov.b #DP_COM_N, DIG_PORT
+    jmp DoneWithDigitWrite
+    
+DoneWithDigitWrite
+    inc &CurrentDigitPos   ; set up for next digit position for next time
+    cmp.b #5, &CurrentDigitPos  ;have we done the last one?, time to start over
+    jl   DoneWithDigitWriteTotally
+    clr &CurrentDigitPos   ; reset it if we need to start over
+    
+DoneWithDigitWriteTotally  
+    pop R15     ; restore R15 before returning
+    ret         ; return
+
+;-------------------------------------------------------------------------------
+; Delay_Long
+;  passed in - nothing
+;  returned - nothing
+;  accomplishes - long delay
+;  uses: R15
+;-------------------------------------------------------------------------------
+Delay_Long
+    push R9     ; save R15 since we use it here
+DelayTopL
+    mov #LONG_DELAY, R9     ;load loop counter (R15) with Long Delay constant
+Loop1Long
+    dec R9                     ; decrement loop counter
+    jnz Loop1Long               ; Zero yet?, no decrement again
+
+    pop R9     ; restore R15 before returning
+    ret         ; return
+;-------------------------------------------------------------------------------
+;  end of Delay_Long
+;-------------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------------
+;           End of all Subroutines
+;-------------------------------------------------------------------------------
+
+
+;-------------------------------------------------------------------------------
+;          Interrupt Service Routines
+;-------------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------------
+; Interrupt Service Routine for Timer_A 0
+;  Passed in: nothing
+;  Activated every time TimerA_0 times out
+;  
+;  Uses: Triggered every 1ms, updates display
+;-------------------------------------------------------------------------------
+
+TA0_ISR
+           call #WriteNextDigitToDisplay
+           reti    ; return from interrupt
+
+;-------------------------------------------------------------------------------
+;  end of TA0_ISR   Timer_A 0 Interrupt Service Routine
+;-------------------------------------------------------------------------------
+
+
+
+;-------------------------------------------------------------------------------
+; Port2_ISR
+;  Passed in: R5 
+;  returned: R5 
+;  accomplishes: toggles R5 to 0(F) or 1(C) depending on the mode if the 
+;                thermometer
+;  uses: R5
+;-------------------------------------------------------------------------------
+Port2_ISR
+    bit.b  #PB_0, &P2IFG  ; checks to see if the rightmost button was pushed
+    jeq    Done_Port2_ISR ; exits interupt if rightmost button was not pushed
+    
+Pushed
+    cmp.w  #1, R5         ; checks what mode thermometer is in  
+    jeq    Switch_1
+    jne    Switch_2
+   
+Switch_1
+    mov.w  #0, R5        ; if in Fahrenheit (0) mode, toggles to Celsius (1)
+    jmp    Done_Port2_ISR
+
+Switch_2
+    mov.w  #1, R5        ; if in Celsius (1)mode, toggles to Fahrenheit (0)
+    jmp    Done_Port2_ISR
+
+Done_Port2_ISR
+    clr.b   &P2IFG
+    reti         ; return from interrupt
+;-------------------------------------------------------------------------------
+;  end of Port1_ISR
+;-------------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------------
+; ADC10_ISR
+;  passed in: Nothing  
+;  returned: R4 
+;  accomplishes: stores ADC10MEM in R4 and inc ADC10_INT counter
+;  uses: R4
+;-------------------------------------------------------------------------------
+ADC10_ISR
+    mov.w &ADC10MEM, R4 ; saves a copy in R4
+    inc   &ADC10_INT    ; inc counter
+
+    reti         ; return from interrupt
+;-------------------------------------------------------------------------------
+;  end of Port1_ISR
+;-------------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------------
+;           End of all Interrupt Service Routines
+;-------------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------------
+;           Definition of Program Data Memory
+;-------------------------------------------------------------------------------
+            ORG   0E000h   ; this line not strictly necessary, but does force
+                            ; the location of this program memory data - this is
+                            ; a matter of convenience  - need to leave enough
+                            ; space ahead of Interrupt Vectors for the data that
+                            ; we are putting here
+
+; usage: use SegPatternTable as base address, then offset into table for
+; a specific 7-seg number (pattern) to display
+SegPatternTable  ; contains patterns for each 7-seg number
+     DB  ZERO_N
+     DB  ONE_N
+     DB  TWO_N
+     DB  THREE_N
+     DB  FOUR_N
+     DB  FIVE_N
+     DB  SIX_N
+     DB  SEVEN_N
+     DB  EIGHT_N
+     DB  NINE_N
+     DB  DEGREE_N
+     
+; usage: use DigitPatternTable as base address, then offset into table for
+; a specific digit position to display
+DigitPatternTable  ; contains patterns for each digit position common selection
+     DB  DIG_0_N
+     DB  DIG_1_N
+     DB  DIG_2_N
+     DB  DIG_3_N
+     DB  DP_COM_N
+     
+;-------------------------------------------------------------------------------
+;           Interrupt Vectors
+;-------------------------------------------------------------------------------
+
+            ORG     0FFEAh                  ;ADC10 Vector
+            DW      ADC10_ISR               ;ADC10 Interrupt Service Routine 
+
+            ORG     0FFF2h                  ;TimerA_0 Vector
+            DW      TA0_ISR                 ;TimerA_0 Interrupt Service Routine
+
+; establish other interrupt(s) as needed in this table in appropriate location(s)
+            
+            ORG     0FFE6h                  ; MSP430 Port 2 Interrupt Vector
+            DW      Port2_ISR               ; address of Port 2 ISR            
+
+            ORG     0FFFEh                  ; MSP430 RESET Vector
+            DW      RESET                   ; establishes the label RESET as 
+                                            ; the starting point
+            END                             ; END of all code for this program
+;-------------------------------------------------------------------------------
+;   End of all code
+;-------------------------------------------------------------------------------
