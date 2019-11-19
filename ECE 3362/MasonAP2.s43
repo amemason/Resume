@@ -1,0 +1,406 @@
+;-------------------------------------------------------------------------------
+;   
+;   Target: TI LaunchPad development board with MSP430G2553 device with the
+;    custom  1 digit expansion Display Board installed
+;
+;       Date:           Oct. 3, 2016
+;       Written by:     Amelia Mason
+;       Adapted from:   Demo With 1 Digit Expansion Bd Revised, Dr. Michael Helm
+;       Assembler/IDE:  IAR Embedded Workbench 5.5
+;
+;       HW I/O assignments:
+;
+;
+;       P1.0    (output) LED1 LaunchPad bd (active high)
+;       P1.1    (input)  pushbutton (top) (active low) expansion bd 
+;       P1.2    (input)  pushbutton (second from top) (active low) expansion bd 
+;       P1.3    (input)  pushbutton on LaunchPad bd (active low)
+;       P1.4    (input) pushbutton (third from top) (active low) expansion bd
+;       P1.5    (input) pushbutton (bottom) (active low) expansion bd 
+;       P1.6    (output) LED2 LaunchPad bd (active high)  
+;       P1.7    (not used)  
+;
+;       P2.0    (output) Segment A (active high) drives display board
+;       P2.1    (output) Segment B (active high) drives display board
+;       P2.2    (output) Segment C (active high) drives display board
+;       P2.3    (output) Segment D (active high) drives display board
+;       P2.4    (output) Segment E (active high) drives display board
+;       P2.5    (output) Segment F (active high) drives display board
+;       P2.6    (output) Segment G (active high) drives display board
+;       P2.7    (output) Segment DP (active high) drives display board
+;
+;
+;
+;*******************************************************************************
+#include  "msp430g2553.h"
+;-------------------------------------------------------------------------------
+; Definition of Constants
+;-------------------------------------------------------------------------------
+
+LONG_DELAY      EQU     65535  ; max 16 bit value (FFFFh)
+
+SHORT_DELAY     EQU     50000  ; 
+
+TIMER_A_COUNT_1   EQU   1000   ; set count value in TimerA_0  
+
+MAX_TIMER_COUNT  EQU    50    ; number of Timer Interrupts that have to occur
+
+SEG_A         EQU     %00000001 ; Port pin position P2.0
+SEG_B         EQU     %00000010 ; Port pin position P2.1
+SEG_C         EQU     %00000100 ; Port pin position P2.2
+SEG_D         EQU     %00001000 ; Port pin position P2.3
+SEG_E         EQU     %00010000 ; Port pin position P2.4
+SEG_F         EQU     %00100000 ; Port pin position P2.5
+SEG_G         EQU     %01000000 ; Port pin position P2.6
+SEG_DP        EQU     %10000000 ; Port pin position P2.7
+
+
+PB_0         EQU     %00000010 ; Port pin position P1.1
+PB_1         EQU     %00000100 ; Port pin position P1.2   
+PB_2         EQU     %00010000 ; Port pin position P1.4   
+PB_3         EQU     %00100000 ; Port pin position P1.5
+PB_LPBD      EQU     %00001000 ; Port pin position P1.3 (on LaunchPad bd)
+
+
+
+SEG_PORT         EQU     P2OUT
+PB_PORT          EQU     P1IN
+
+
+ONE             EQU     %00000110
+TWO             EQU     %01011011
+THREE           EQU     %01001111
+FOUR            EQU     %01100110
+FIVE            EQU     %01101101
+SIX             EQU     %01111101
+SEVEN           EQU     %00000111
+EIGHT           EQU     %01111111
+NINE            EQU     %01100111
+ZERO            EQU     %00111111
+A_DISP          EQU     %01110111
+B_DISP          EQU     %01111100
+C_DISP          EQU     %00111001
+D_DISP          EQU     %01011110
+E_DISP          EQU     %01111001
+F_DISP          EQU     %01110001
+DASH            EQU     %01000000
+
+
+;-------------------------------------------------------------------------------
+; Definition of Variables
+;-------------------------------------------------------------------------------
+
+                ORG   0200h     ; beginning of RAM space (necessary statement)
+
+; no variables used in this simple example
+
+;-------------------------------------------------------------------------------
+            ORG     0C000h                  ; Program Reset (prog memory start)
+                                            ; this is Program memory start 
+                                            ; address for MSP430G2553 (16K)
+;-------------------------------------------------------------------------------
+RESET       mov.w   #0400h,SP        ; Initialize stackpointer(to end of RAM +1)
+                                     ; RAM is 512 bytes, last position is 3FFh
+                                     
+StopWDT     mov.w   #WDTPW+WDTHOLD,&WDTCTL  ; Stop WDT
+
+SetupP2     ;;;mov.b   #0FFh, &P1DIR  ; all as outputs          
+            mov.b   #0FFh, &P2DIR ; all as outputs to drive 7-seg LED 
+                                                            
+           bic.b    #0C0h, &P2SEL   ; Clears the P2SEL bits so that 
+                                        ; P2.6 and P2.7 function as GPIO pins
+                                        
+           mov.b    #0BEh, &P1REN    ;turn on the internal resistor for PB's
+           mov.b    #0BEh, &P1OUT    ; set the resistors to Pullup mode                                        
+          
+           
+           ; turn off all the segments 
+           clr.b  &SEG_PORT
+          
+ReadButton   
+           cmp.b #%10110110, &P1IN  ;Read the LaunchPan pushbutton
+           jne ReadButton       ;If button is not pressed (HIGH) repeat check
+           jmp LPBPressed       ;If button is pressed (LOW), go onto pt. 1
+           
+LPBPressed                      ;Part 1, displays class number
+           mov.b #THREE, &SEG_PORT       ;Displays 3
+           call #Delay_Long
+           call #Delay_Long
+           call #Delay_Long
+           call #Delay_Long
+           call #Delay_Long
+           call #Delay_Long
+           
+           mov.b #SIX, &SEG_PORT         ;Displays 6
+           call #Delay_Long
+           call #Delay_Long
+           call #Delay_Long
+           call #Delay_Long
+           call #Delay_Long
+           call #Delay_Long
+           
+           clr.b &SEG_PORT              ;Clears display
+           call #Delay_Long
+           call #Delay_Long
+           call #Delay_Long
+           jmp ECEDisplay
+           
+ECEDisplay                      ;Part 2, displays ECE-3362
+           mov.b #E_DISP, &SEG_PORT     ;Displays 'E'
+           call #Delay_Long
+           call #Delay_Long
+           call #Delay_Long
+           
+           mov.b #C_DISP, &SEG_PORT     ;Displays 'C'
+           call #Delay_Long
+           call #Delay_Long
+           call #Delay_Long
+           
+           mov.b #E_DISP, &SEG_PORT     ;Displays 'E'
+           call #Delay_Long
+           call #Delay_Long
+           call #Delay_Long
+           
+           mov.b #DASH, &SEG_PORT       ;Displays a dash
+           call #Delay_Long
+           call #Delay_Long
+           call #Delay_Long
+           
+           mov.b #THREE, &SEG_PORT      ;Displays 3
+           call #Delay_Long
+           call #Delay_Long
+           call #Delay_Long
+           
+           clr.b &SEG_PORT              ;Clears the display 
+           call #Delay_Short
+           
+           mov.b #THREE, &SEG_PORT      ;Displays 3
+           call #Delay_Long
+           call #Delay_Long
+           call #Delay_Long
+           
+           mov.b #SIX, &SEG_PORT        ;Displays 6
+           call #Delay_Long
+           call #Delay_Long
+           call #Delay_Long
+           
+           mov.b #TWO, &SEG_PORT        ;Displays 2
+           call #Delay_Long
+           call #Delay_Long
+           call #Delay_Long
+           
+           clr.b &SEG_PORT              ;Clears the display
+           call #Delay_Long
+           call #Delay_Long
+           jmp ReadPort1
+           
+           
+ReadPort1 
+           ;10HHLHH0 - LaunchPad button pressed
+           cmp.b #%10110110, &P1IN
+           jeq   LPBPressed
+
+           ;10HH1HH0 - no buttons pressed
+           cmp.b #%10111110, &P1IN
+           jeq   Case_Zero
+           
+           ;10HH1HL0  - top button pressed
+           cmp.b #%10111100, &P1IN  
+           jeq   Case_One       
+           
+           ;10HH1LH0  - one down from top button pressed                                
+           cmp.b #%10111010, &P1IN
+           jeq   Case_Two          
+           
+           ;10HH1LL0  - top & one down buttons pressed             
+           cmp.b #%10111000, &P1IN
+           jeq   Case_Three 
+           
+           ;10HL1HH0 - two down from top button pressed
+           cmp.b #%10101110, &P1IN
+           jeq   Case_Four         
+       
+           ;10HL1HL0 - two down & top buttons pressed
+           cmp.b #%10101100, &P1IN
+           jeq   Case_Five
+           
+           ;10HL1LH0 - two down & one down buttons pressed
+           cmp.b #%10101010, &P1IN
+           jeq   Case_Six
+           
+           ;10HL1LL0 - two down, one down, & top buttons pressed
+           cmp.b #%10101000, &P1IN
+           jeq   Case_Seven
+           
+           ;10LH1HH0 - three down from top button pressed
+           cmp.b #%10011110, &P1IN
+           jeq   Case_Eight
+           
+           ;10LH1HL0 - three down & top buttons pressed
+           cmp.b #%10011100, &P1IN
+           jeq   Case_Nine
+           
+           ;10LH1LH0 - three down & one down buttons pressed
+           cmp.b #%10011010, &P1IN
+           jeq   Case_Ten
+           
+           ;10LH1LL0 - three down, one down, & top buttons pressed
+           cmp.b #%10011000, &P1IN
+           jeq   Case_Eleven
+           
+           ;10LL1HH0 - three down & two down buttons pressed
+           cmp.b #%10001110, &P1IN
+           jeq   Case_Twelve
+           
+           ;10LL1HL0 - three down, two down buttons pressed, & top pressed
+           cmp.b #%10001100, &P1IN
+           jeq   Case_Thirteen
+           
+           ;10LL1LH0 - three down, two down, & one down pressed
+           cmp.b #%10001010, &P1IN
+           jeq   Case_Fourteen
+           
+           ;10LL1LL0 - all buttons pressed
+           cmp.b #%10001000, &P1IN
+           jeq   Case_Fifteen
+           
+           jmp Done  ; no match
+           
+           
+Case_Zero             ;displays 0
+           mov.b #ZERO, &SEG_PORT
+           jmp Done
+           
+Case_One              ;display 1     
+           mov.b #ONE, &SEG_PORT
+           jmp Done          
+          
+Case_Two              ;display 2    
+           mov.b #TWO, &SEG_PORT
+           jmp Done  
+           
+Case_Three            ;display 3     
+           mov.b #THREE, &SEG_PORT
+           jmp Done                      
+  
+Case_Four             ;display 4
+           mov.b #FOUR, &SEG_PORT
+           jmp Done
+           
+Case_Five             ;display 5
+          mov.b #FIVE, &SEG_PORT
+          jmp Done
+          
+Case_Six             ;display 6
+          mov.b #SIX, &SEG_PORT
+          jmp Done        
+
+Case_Seven           ;display 7
+          mov.b #SEVEN, &SEG_PORT
+          jmp Done
+          
+Case_Eight           ;display 8
+          mov.b #EIGHT, &SEG_PORT
+          jmp Done
+          
+Case_Nine            ;display 9
+          mov.b #NINE, &SEG_PORT
+          jmp Done
+          
+Case_Ten             ;display "A"
+          mov.b #A_DISP, &SEG_PORT
+          jmp Done
+          
+Case_Eleven          ;display "B"
+          mov.b #B_DISP, &SEG_PORT
+          jmp Done
+
+Case_Twelve          ;display "C"
+          mov.b #C_DISP, &SEG_PORT
+          jmp Done
+          
+Case_Thirteen        ;display "D"
+          mov.b #D_DISP, &SEG_PORT
+          jmp Done
+
+Case_Fourteen        ;display "E"
+          mov.b #E_DISP, &SEG_PORT
+          jmp Done
+          
+Case_Fifteen         ;display "F"
+          mov.b #F_DISP, &SEG_PORT
+          jmp Done
+
+Done:      call #Delay_Long
+
+           ; turn off all the segments to clear results of last PB press
+           clr.b  &SEG_PORT
+        
+           ;repeats to check for next button pressed
+           jmp ReadPort1
+      
+
+
+;-------------------------------------------------------------------------------
+;           End of main code
+;-------------------------------------------------------------------------------                                            
+                                           
+;-------------------------------------------------------------------------------
+;           Subroutines
+;------------------------------------------------------------------------------- 
+
+
+;-------------------------------------------------------------------------------
+; Delay_Long
+;  passed in - nothing
+;  returned - nothing
+;  accomplishes - long delay
+;  uses: R15
+;-------------------------------------------------------------------------------
+Delay_Long
+    push R15     ; save R15 since we use it here
+DelayTopL
+    mov #LONG_DELAY, R15     ;load loop counter (R15) with Long Delay constant
+Loop1Long
+    dec R15                     ; decrement loop counter
+    jnz Loop1Long               ; Zero yet?, no decrement again
+
+    pop R15     ; restore R15 before returning
+    ret         ; return
+;-------------------------------------------------------------------------------
+;  end of Delay_Long
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+; Delay_Short
+;  passed in - nothing
+;  returned - nothing
+;  accomplishes - short delay
+;  uses: R15
+;-------------------------------------------------------------------------------
+Delay_Short
+     push r15
+DelayTopS
+     mov #SHORT_DELAY, R15
+Loop1Short
+     dec R15
+     jnz Loop1Short
+     
+     pop R15
+     ret
+;-------------------------------------------------------------------------------
+;  end of Delay_Short
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;           End of all Subroutines
+;-------------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------------
+;           Interrupt Vectors
+;-------------------------------------------------------------------------------
+
+            ORG     0FFFEh                  ; MSP430 RESET Vector
+            DW      RESET                   ; establishes the label RESET as 
+                                            ; the starting point
+            END                             ; END of all code for this program
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
