@@ -5,7 +5,7 @@
 **Texas Tech University - Lubbock, TX**<br>
 Undergraduate Research Assistant under Dr. Linda Allen<br>
 August 2018 – May 2019<br>
-•	Coded and ran SIR and SEIR models of disease outbreaks<br>
+•	Using MATLAB, created programs to run SIR and SEIR models of disease outbreaks<br>
 •	Worked on modeling stochastic versions of SIR and SEIR models<br>
 •	Compiled data on SIR and SEIR disease models<br>
 
