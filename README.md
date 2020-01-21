@@ -11,7 +11,7 @@ August 2018 – May 2019<br>
 
 ## Skills
 **Programing Languages** <br>
-MATLAB, C++, Python<br>
+MATLAB, C++, Python, R<br>
 
 **Software** <br>
 Microsoft Word, Microsoft Excel, Microsoft Power BI, Adobe Photoshop
